@@ -248,7 +248,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="title">请求链接</td>
+                <td class="title">Action/td>
                 <td class="input">
                     <input type="text" id="editAFloater-requestUrl"/>
                 </td>

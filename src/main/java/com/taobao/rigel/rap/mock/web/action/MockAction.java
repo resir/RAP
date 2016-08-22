@@ -1,6 +1,7 @@
 package com.taobao.rigel.rap.mock.web.action;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.taobao.rigel.rap.common.base.ActionBase;
 import com.taobao.rigel.rap.common.utils.HTTPUtils;
 import com.taobao.rigel.rap.common.utils.StringUtils;
@@ -13,12 +14,16 @@ import com.taobao.rigel.rap.project.bo.Project;
 import com.taobao.rigel.rap.project.service.ProjectMgr;
 import org.apache.logging.log4j.LogManager;
 import org.apache.struts2.ServletActionContext;
+import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 
 public class MockAction extends ActionBase {
@@ -205,6 +210,59 @@ public class MockAction extends ActionBase {
         } else {
             return SUCCESS;
         }
+    }
+
+    public String httpService() throws UnsupportedEncodingException {
+        System.out.println("httpService!!   It's awesome");
+
+        HttpServletRequest request = ServletActionContext.getRequest();
+        request.setCharacterEncoding("UTF-8");
+        StringBuffer jb = new StringBuffer();
+        String line = null;
+        try  {
+            BufferedReader reader = request.getReader();
+            while ((line = reader.readLine()) != null)
+                jb.append(line);
+        }  catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(jb);
+        JSONObject jsonObject = new JSONObject(jb.toString());
+        String action = jsonObject.getJSONObject("request").getJSONObject("common").getString("action");
+        if(org.apache.commons.lang.StringUtils.isEmpty(action)){
+            System.out.println("无参数");
+        }
+
+        StringBuilder patternSb= new StringBuilder();
+        patternSb.append("/").append(action).append("?");
+        JSONObject content = jsonObject.getJSONObject("request").getJSONObject("content");
+        for(String key:content.keySet()){
+            patternSb.append(key).append('=').append(content.get(key).toString()).append("&");
+        }
+        pattern=patternSb.toString();
+        __id__=1;
+        String isJson=createRule();
+        JSONObject result = getBaseResult();
+        result.getJSONObject("response").put("content", new JSONObject(getContent()));
+        setContent(result.toString());
+        return isJson;
+    }
+
+    public JSONObject getBaseResult(){
+        return new JSONObject("{\n" +
+                "\t\"response\": {\n" +
+                "\t\t\"content\": null,\n" +
+                "\t\t\"info\": {\n" +
+                "\t\t\t\"access_id\": \"47a273242cb44272ee3cb5f88e9ac5bd\",\n" +
+                "\t\t\t\"code\": \"100000\",\n" +
+                "\t\t\t\"maintain_endtime\": \"0\",\n" +
+                "\t\t\t\"maintain_starttime\": \"0\",\n" +
+                "\t\t\t\"msg\": \"成功\",\n" +
+                "\t\t\t\"server_time\": \"1471844106\",\n" +
+                "\t\t\t\"serversion\": \"1.0\"\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "}");
     }
 
     public String createRule() throws UnsupportedEncodingException {
