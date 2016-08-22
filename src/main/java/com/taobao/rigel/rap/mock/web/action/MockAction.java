@@ -243,7 +243,15 @@ public class MockAction extends ActionBase {
         __id__=1;
         String isJson=createRule();
         JSONObject result = getBaseResult();
-        result.getJSONObject("response").put("content", new JSONObject(getContent()));
+
+        JSONObject contentJson=new JSONObject(getContent());
+        if(contentJson.keySet().size()>1) {
+            result.getJSONObject("response").put("content", contentJson);
+        }else{
+            for(String key:contentJson.keySet()){
+                result.getJSONObject("response").put("content", contentJson.get(key));
+            }
+        }
         setContent(result.toString());
         return isJson;
     }
